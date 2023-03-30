@@ -18,6 +18,7 @@ const errorHandler = require('./api/libs/errorHandler');
 const path = require('path');
 const multer = require('multer');
 const methodOverride = require('method-override');
+const cors = require('cors');
 
 
 const passport = require('passport');

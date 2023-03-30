@@ -22,7 +22,7 @@ const jwtAuthenticate = passport.authenticate('jwt', { session: false });
 
 const amistadesController = require('../amistades/amistades.controller');
 
-const usuariosRouter = express.Router();
+const router = express.Router();
 
 function transformarBodyALowercase(req, res, next) {
   req.body.username && (req.body.username = req.body.username.toLowerCase());
@@ -30,73 +30,115 @@ function transformarBodyALowercase(req, res, next) {
   next();
 }
 
-usuariosRouter.get(
-  '/',
-  procesarErrores((req, res) => {
-    return usuarioController.obtenerUsuarios().then(usuarios => {
-      res.json(usuarios);
-    });
-  })
-);
 
-usuariosRouter.get(
-  '/explore',
-  [jwtAuthenticate],
-  procesarErrores(async (req, res) => {
-    usuarioController
-      .obtenerUsuariosExplore(req.user.id)
-      .then(usuarios => res.json(usuarios));
+router.get('/',(req, res) => {
+  return usuarioController.obtenerUsuarios().then(usuarios => {
+    res.json(usuarios);
+  });
+})
 
-    // return usuarioController.obtenerUsuarios().then(usuarios => {
-    //   res.json(usuarios);
-    // });
-  })
-);
+// usuariosRouter.get(
+//   '/',
+//   procesarErrores((req, res) => {
+//     return usuarioController.obtenerUsuarios().then(usuarios => {
+//       res.json(usuarios);
+//     });
+//   })
+// );
 
-usuariosRouter.get(
-  '/whoami',
-  [jwtAuthenticate],
-  procesarErrores(async (req, res) => {
-    res.json(esconderCamposSensibles(req.user));
-  })
-);
 
-usuariosRouter.get(
-  '/:username',
-  [jwtAuthenticate],
-  procesarErrores(async (req, res) => {
-    const username = req.params.username;
-    const usuario = await usuarioController.obtenerUsuario(
-      { username },
-      req.user.id
-    );
+router.get('/explore', [jwtAuthenticate],async(req, res) => {
+  usuarioController
+  .obtenerUsuariosExplore(req.user.id)
+  .then(usuarios => res.json(usuarios));
 
-    if (!usuario) {
-      let err = new Error(`Usuario con username [${username}] no existe.`);
-      err.status = 404;
-      throw err;
-    }
+});
 
-    res.json(esconderCamposSensibles(usuario));
-  })
-);
 
-usuariosRouter.post(
-  '/signup',
-  [validarUsuario, transformarBodyALowercase],
-  procesarErrores((req, res) => {
-    let nuevoUsuario = req.body;
+
+// usuariosRouter.get(
+//   '/explore',
+//   [jwtAuthenticate],
+//   procesarErrores(async (req, res) => {
+//     usuarioController
+//       .obtenerUsuariosExplore(req.user.id)
+//       .then(usuarios => res.json(usuarios));
+
+//     // return usuarioController.obtenerUsuarios().then(usuarios => {
+//     //   res.json(usuarios);
+//     // });
+//   })
+// );
+
+
+
+router.get('/whoami', [jwtAuthenticate],async(req, res) => {
+  res.json(esconderCamposSensibles(req.user));
+});
+
+// usuariosRouter.get(
+//   '/whoami',
+//   [jwtAuthenticate],
+//   procesarErrores(async (req, res) => {
+//     res.json(esconderCamposSensibles(req.user));
+//   })
+// );
+
+
+
+router.get('/:username', [jwtAuthenticate],async(req, res) => {
+  const username = req.params.username;
+  const usuario = await usuarioController.obtenerUsuario(
+    { username },
+    req.user.id
+  );
+
+  if (!usuario) {
+    let err = new Error(`Usuario con username [${username}] no existe.`);
+    err.status = 404;
+    throw err;
+  }
+
+  res.json(esconderCamposSensibles(usuario));
+});
+
+
+
+// usuariosRouter.get(
+//   '/:username',
+//   [jwtAuthenticate],
+//   procesarErrores(async (req, res) => {
+//     const username = req.params.username;
+//     const usuario = await usuarioController.obtenerUsuario(
+//       { username },
+//       req.user.id
+//     );
+
+//     if (!usuario) {
+//       let err = new Error(`Usuario con username [${username}] no existe.`);
+//       err.status = 404;
+//       throw err;
+//     }
+
+//     res.json(esconderCamposSensibles(usuario));
+//   })
+// );
+
+
+router.post('/signup', [validarUsuario, transformarBodyALowercase], (req, res) => {
+  let nuevoUsuario = req.body;
 
     return usuarioController
       .usuarioExiste(nuevoUsuario.username, nuevoUsuario.email)
       .then(usuarioExiste => {
         if (usuarioExiste) {
-          log.warn(
-            `Email [${nuevoUsuario.email}] o username [${
-              nuevoUsuario.username
-            }] ya existen en la base de datos`
-          );
-          throw new DatosDeUsuarioYaEnUso();
+          return res.send({error:'This user does not exist'})
+          // log.warn(
+          //   `Email [${nuevoUsuario.email}] o username [${
+          //     nuevoUsuario.username
+          //   }] ya existen en la base de datos`
+          // );
+          // throw new DatosDeUsuarioYaEnUso();
         }
 
         return bcrypt.hash(nuevoUsuario.password, 10);
@@ -117,14 +159,54 @@ usuariosRouter.post(
             amistadesController.crearAmistad(nuevoUsario._id, nuevoUsario._id);
           });
       });
-  })
-);
+  });
 
-usuariosRouter.post(
-  '/login',
-  [validarPedidoDeLogin, transformarBodyALowercase],
-  procesarErrores(async (req, res) => {
-    let usuarioNoAutenticado = req.body;
+
+
+// usuariosRouter.post(
+//   '/signup',
+//   [validarUsuario, transformarBodyALowercase],
+//   procesarErrores((req, res) => {
+//     let nuevoUsuario = req.body;
+
+//     return usuarioController
+//       .usuarioExiste(nuevoUsuario.username, nuevoUsuario.email)
+//       .then(usuarioExiste => {
+//         if (usuarioExiste) {
+//           log.warn(
+//             `Email [${nuevoUsuario.email}] o username [${
+//               nuevoUsuario.username
+//             }] ya existen en la base de datos`
+//           );
+//           throw new DatosDeUsuarioYaEnUso();
+//         }
+
+//         return bcrypt.hash(nuevoUsuario.password, 10);
+//       })
+//       .then(hash => {
+//         return usuarioController
+//           .crearUsuario(nuevoUsuario, hash)
+//           .then(nuevoUsario => {
+//             res.status(201).json({
+//               token: crearToken(nuevoUsario._id),
+//               usuario: esconderCamposSensibles(nuevoUsario)
+//             });
+
+//             return nuevoUsario;
+//           })
+//           .then(nuevoUsario => {
+//             // El usuario creado se sigue a si mismo
+//             amistadesController.crearAmistad(nuevoUsario._id, nuevoUsario._id);
+//           });
+//       });
+//   })
+// );
+
+
+
+
+router.post('/login', [validarPedidoDeLogin, transformarBodyALowercase],async(req, res) => {
+  let usuarioNoAutenticado = req.body;
 
     let usuarioRegistrado = await usuarioController.obtenerUsuario({
       email: usuarioNoAutenticado.email
@@ -162,30 +244,100 @@ usuariosRouter.post(
       );
       throw new CredencialesIncorrectas();
     }
-  })
-);
+  });
 
-usuariosRouter.post(
-  '/upload',
-  [jwtAuthenticate, validarImagen],
-  procesarErrores(async (req, res) => {
-    const username = req.user.username;
-    const usuario = req.user;
-    log.info(`Request recibido de usuario [${username}] para subir imagen`);
 
-    const nombreRandomizado = `${uuidv4()}.${req.extensionDeArchivo}`;
-    const urlDeImagen = await guardarImagen(req.body, nombreRandomizado);
 
-    req.user.imagen = urlDeImagen;
-    await usuario.save();
+// usuariosRouter.post(
+//   '/login',
+//   [validarPedidoDeLogin, transformarBodyALowercase],
+//   procesarErrores(async (req, res) => {
+//     let usuarioNoAutenticado = req.body;
 
-    log.info(
-      `El usuario [${username}] ha actualizado su imagen de perfil [${urlDeImagen}].`
-    );
+//     let usuarioRegistrado = await usuarioController.obtenerUsuario({
+//       email: usuarioNoAutenticado.email
+//     });
+//     if (!usuarioRegistrado) {
+//       log.info(
+//         `Usuario con email [${
+//           usuarioNoAutenticado.email
+//         }] no existe. No pudo ser autenticado`
+//       );
+//       throw new CredencialesIncorrectas();
+//     }
 
-    res.json({ url: urlDeImagen });
-  })
-);
+//     let contraseñaCorrecta = await bcrypt.compare(
+//       usuarioNoAutenticado.password,
+//       usuarioRegistrado.password
+//     );
+//     if (contraseñaCorrecta) {
+//       let token = crearToken(usuarioRegistrado.id);
+
+//       log.info(
+//         `Usuario con email ${
+//           usuarioNoAutenticado.email
+//         } completo autenticación exitosamente.`
+//       );
+
+//       const usuario = esconderCamposSensibles(usuarioRegistrado);
+
+//       res.status(200).json({ token, usuario });
+//     } else {
+//       log.info(
+//         `Usuario con email ${
+//           usuarioNoAutenticado.email
+//         } no completo autenticación. Contraseña incorrecta`
+//       );
+//       throw new CredencialesIncorrectas();
+//     }
+//   })
+// );
+
+
+
+router.post('/upload', [jwtAuthenticate, validarImagen],async(req, res) => {
+  const username = req.user.username;
+  const usuario = req.user;
+  log.info(`Request recibido de usuario [${username}] para subir imagen`);
+
+  const nombreRandomizado = `${uuidv4()}.${req.extensionDeArchivo}`;
+  const urlDeImagen = await guardarImagen(req.body, nombreRandomizado);
+
+  req.user.imagen = urlDeImagen;
+  await usuario.save();
+
+  log.info(
+    `El usuario [${username}] ha actualizado su imagen de perfil [${urlDeImagen}].`
+  );
+
+  res.json({ url: urlDeImagen });
+});
+
+
+
+
+
+// usuariosRouter.post(
+//   '/upload',
+//   [jwtAuthenticate, validarImagen],
+//   procesarErrores(async (req, res) => {
+//     const username = req.user.username;
+//     const usuario = req.user;
+//     log.info(`Request recibido de usuario [${username}] para subir imagen`);
+
+//     const nombreRandomizado = `${uuidv4()}.${req.extensionDeArchivo}`;
+//     const urlDeImagen = await guardarImagen(req.body, nombreRandomizado);
+
+//     req.user.imagen = urlDeImagen;
+//     await usuario.save();
+
+//     log.info(
+//       `El usuario [${username}] ha actualizado su imagen de perfil [${urlDeImagen}].`
+//     );
+
+//     res.json({ url: urlDeImagen });
+//   })
+// );
 
 function crearToken(usuarioId) {
   return jwt.sign({ id: usuarioId }, config.jwt.secreto, {
@@ -208,4 +360,4 @@ function esconderCamposSensibles(usuario) {
   };
 }
 
-module.exports = usuariosRouter;
+module.exports = router;

@@ -99,28 +99,28 @@ function crearPost(post, usuarioId) {
   }).save();
 }
 
-async function guardarImagen(imageData, nombreDelArchivo) {
-  // if (!config.guardarImagenesEnS3) {
-  //   // Guardar imagenes en la carpeta /public/imagenes
-  //   await fs.writeFile(`${__dirname}/../../../public/imagenes/${nombreDelArchivo}`, imageData)
-  //   return `/imagenes/${nombreDelArchivo}`
-  // }
+// async function guardarImagen(imageData, nombreDelArchivo) {
+//   if (!config.guardarImagenesEnS3) {
+//     // Guardar imagenes en la carpeta /public/imagenes
+//     await fs.writeFile(`${__dirname}/../../../public/imagenes/${nombreDelArchivo}`, imageData)
+//     return `/imagenes/${nombreDelArchivo}`
+//   }
 
-  // const destinacionDeImagen = `${config.pathEnBucket}/${nombreDelArchivo}`
-  // await s3Client.putObject({
-  //   Body: imageData,
-  //   Bucket: config.s3BucketName,
-  //   Key: destinacionDeImagen
-  // }).promise()
+//   const destinacionDeImagen = `${config.pathEnBucket}/${nombreDelArchivo}`
+//   await s3Client.putObject({
+//     Body: imageData,
+//     Bucket: config.s3BucketName,
+//     Key: destinacionDeImagen
+//   }).promise()
   
-  // return `https://s3.amazonaws.com/${config.s3BucketName}/${destinacionDeImagen}`;
-}
+//   return `https://s3.amazonaws.com/${config.s3BucketName}/${destinacionDeImagen}`;
+// }
 
 module.exports = {
   obtenerPosts,
   obtenerPost,
   crearPost,
-  guardarImagen,
+//  guardarImagen,
   obtenerPostsParaUsuario,
   obtenerFeed
 };

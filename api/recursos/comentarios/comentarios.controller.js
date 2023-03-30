@@ -1,6 +1,8 @@
 const { Comentario } = require('./comentarios.model');
 const { Post } = require('../posts/posts.model');
 
+
+
 function obtenerTodosLosComentarios() {
   return Comentario.find({}).populate('usuario', '_id username');
 }

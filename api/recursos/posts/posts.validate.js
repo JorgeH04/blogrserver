@@ -4,7 +4,8 @@ const log = require('../../../utils/logger');
 
 const blueprintDePost = Joi.object().keys({
   url: Joi.string().required(),
-  caption: Joi.string().max(180)
+  caption: Joi.string().max(180),
+  title: Joi.string() 
 });
 
 function validarMetadataDePost(req, res, next) {

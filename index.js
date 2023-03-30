@@ -1,6 +1,7 @@
 if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config();
-}   
+}    
+
 const express = require('express');
 const bodyParser = require('body-parser');
 const morgan = require('morgan');
@@ -14,6 +15,10 @@ const logger = require('./utils/logger');
 const authJWT = require('./api/libs/auth');
 const config = require('./config');
 const errorHandler = require('./api/libs/errorHandler');
+const path = require('path');
+const multer = require('multer');
+const methodOverride = require('method-override');
+
 
 const passport = require('passport');
 passport.use(authJWT);
@@ -23,7 +28,35 @@ require('./database');
 
 const app = express();
 
-app.set('port', process.env.PORT || 3000);
+app.set('port', process.env.PORT || 4000);
+
+// middlewares
+app.use(express.static(path.join(__dirname, 'public'))); 
+app.use(express.static(path.join(__dirname, 'views')));
+app.use(express.urlencoded({extended: false}));
+app.use(methodOverride('_method'));
+
+app.use(cors({origin: 'https://blogig.netlify.app'}));
+  
+const storage = multer.diskStorage({
+  destination: path.join(__dirname, 'public/img/uploads'), 
+  filenameuno: (req, files, cb, filenameuno) => {
+    console.log(files);
+       cb(null, uuid() + path.extname(files.originalnameuno));
+  },
+  filenamedos: (req, files, cb, filenamedos) => {
+    console.log(files)
+     cb(null, uuid() + path.extname(files.originalnamedos));
+},
+   filenametres: (req, files, cb, filenametres) => {
+  console.log(files);
+   cb(null, uuid() + path.extname(files.originalnametres));
+},
+}) 
+   
+
+app.use(multer({ storage: storage }).array('files', 12))
+
 
 
 app.use(bodyParser.json());
@@ -50,7 +83,7 @@ app.use('/api/amistades', amistadesRouter);
 
  
 
-  let server;
+let server;
 
  
 app.listen(app.get('port'), () => {
@@ -61,3 +94,4 @@ app.listen(app.get('port'), () => {
 //   app,
 //   server
 // };
+      

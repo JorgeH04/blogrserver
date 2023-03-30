@@ -16,6 +16,9 @@ const postSchema = new mongoose.Schema(
       ref: 'usuario',
       index: true
     },
+    title: {
+      type: String,
+    },
     caption: {
       type: String,
       maxlength: 180

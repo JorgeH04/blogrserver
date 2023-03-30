@@ -132,13 +132,13 @@ router.post('/signup', [validarUsuario, transformarBodyALowercase], (req, res) =
       .usuarioExiste(nuevoUsuario.username, nuevoUsuario.email)
       .then(usuarioExiste => {
         if (usuarioExiste) {
-          return res.send({error:'This user does not exist'})
-          // log.warn(
-          //   `Email [${nuevoUsuario.email}] o username [${
-          //     nuevoUsuario.username
-          //   }] ya existen en la base de datos`
-          // );
-          // throw new DatosDeUsuarioYaEnUso();
+         // return res.send({error:'This user does not exist'})
+          log.warn(
+            `Email [${nuevoUsuario.email}] o username [${
+              nuevoUsuario.username
+            }] ya existen en la base de datos`
+          );
+          throw new DatosDeUsuarioYaEnUso();
         }
 
         return bcrypt.hash(nuevoUsuario.password, 10);

@@ -37,7 +37,7 @@ app.use(express.static(path.join(__dirname, 'views')));
 app.use(express.urlencoded({extended: false}));
 app.use(methodOverride('_method'));
 
-//app.use(cors({origin: 'https://blogig.netlify.app'}));
+app.use(cors({origin: 'https://blogig.netlify.app'}));
   
 const storage = multer.diskStorage({
   destination: path.join(__dirname, 'public/img/uploads'), 
